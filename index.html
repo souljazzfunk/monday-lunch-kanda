@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>月曜ランチ難民マップ｜神田小川町</title>
+<title>月曜ランチ難民マップ</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <style>
   :root {
@@ -13,7 +13,6 @@
     --muted: #6b6560;
     --accent: #c45c26;
     --accent2: #2c6e49;
-    --origin: #1d4ed8;
     --chip: #efeae3;
     --border: #e4ddd3;
     --shadow: 0 8px 24px rgba(28,26,23,.08);
@@ -94,8 +93,8 @@
 <body>
 <header>
   <div>
-    <h1>月曜ランチ難民マップ｜神田小川町</h1>
-    <p>起点：神田小川町1-7　徒歩圏・月曜ランチ営業・異国料理寄り</p>
+    <h1>月曜ランチ難民マップ</h1>
+    <p>月曜ランチ営業・異国料理寄り</p>
   </div>
   <div style="display:flex;gap:8px;align-items:center;">
     <button class="menu-btn" id="toggleList" type="button">一覧</button>
@@ -117,7 +116,6 @@
   <div id="map-wrap" style="position:relative;min-height:0;">
     <div id="map"></div>
     <div class="legend">
-      <div><span style="background:#1d4ed8"></span>起点</div>
       <div><span style="background:#c45c26"></span>ランチ候補</div>
     </div>
   </div>
@@ -138,12 +136,6 @@
 </script>
 <script type="application/json" id="data">
 {
-  "origin": {
-    "name": "起点（神田小川町1-7）",
-    "lat": 35.694077,
-    "lng": 139.765594,
-    "address": "東京都千代田区神田小川町1-7"
-  },
   "restaurants": [
     {
       "id": 1,
@@ -151,7 +143,6 @@
       "genre": "北インド",
       "lat": 35.696842,
       "lng": 139.769363,
-      "walkMins": 6,
       "mondayLunchHours": "11:00–15:00（L.O.14:30）",
       "reservation": "yes",
       "tip": "百名店クラスの本格北インドカレー",
@@ -165,7 +156,6 @@
       "genre": "メキシコ",
       "lat": 35.695595,
       "lng": 139.769958,
-      "walkMins": 5,
       "mondayLunchHours": "11:00–15:00（L.O.14:30）",
       "reservation": "yes",
       "tip": "自家製タコスとブリトー",
@@ -179,7 +169,6 @@
       "genre": "フレンチ",
       "lat": 35.693401,
       "lng": 139.760452,
-      "walkMins": 6,
       "mondayLunchHours": "11:30–15:00（L.O.14:00）",
       "reservation": "yes",
       "tip": "テラススクエアのカジュアルフレンチ",
@@ -193,7 +182,6 @@
       "genre": "タイ",
       "lat": 35.69231,
       "lng": 139.772156,
-      "walkMins": 8,
       "mondayLunchHours": "11:30–15:00（L.O.14:30）",
       "reservation": "yes",
       "tip": "ランチ一律990円の屋台タイ",
@@ -207,7 +195,6 @@
       "genre": "ベトナム",
       "lat": 35.69244,
       "lng": 139.770004,
-      "walkMins": 5,
       "mondayLunchHours": "11:00–15:00",
       "reservation": "yes",
       "tip": "フォーとバインミーが人気",
@@ -221,7 +208,6 @@
       "genre": "タイ・ベトナム",
       "lat": 35.692856,
       "lng": 139.77179,
-      "walkMins": 7,
       "mondayLunchHours": "11:30–15:00",
       "reservation": "yes",
       "tip": "神田駅すぐのタイ＆ベトナム定番",
@@ -235,7 +221,6 @@
       "genre": "南インド",
       "lat": 35.690758,
       "lng": 139.770233,
-      "walkMins": 7,
       "mondayLunchHours": "11:15–15:00（L.O.14:30）",
       "reservation": "no",
       "tip": "ミールスとバターチキンが名物",
@@ -249,7 +234,6 @@
       "genre": "モロッコ",
       "lat": 35.690712,
       "lng": 139.765991,
-      "walkMins": 5,
       "mondayLunchHours": "11:30–14:30",
       "reservation": "yes",
       "tip": "クスクスとタジンの老舗",
@@ -263,7 +247,6 @@
       "genre": "タイ",
       "lat": 35.695614,
       "lng": 139.757889,
-      "walkMins": 9,
       "mondayLunchHours": "11:00–15:30（L.O.15:00）",
       "reservation": "yes",
       "tip": "神保町の老舗タイレストラン",
@@ -277,7 +260,6 @@
       "genre": "タイ",
       "lat": 35.695683,
       "lng": 139.759888,
-      "walkMins": 7,
       "mondayLunchHours": "11:00–15:00",
       "reservation": "yes",
       "tip": "家庭的なタイ定食",
@@ -291,7 +273,6 @@
       "genre": "タイ",
       "lat": 35.694736,
       "lng": 139.759354,
-      "walkMins": 7,
       "mondayLunchHours": "11:00–15:00",
       "reservation": "yes",
       "tip": "ガパオとグリーンカレー",
@@ -305,7 +286,6 @@
       "genre": "インド",
       "lat": 35.694908,
       "lng": 139.765533,
-      "walkMins": 1,
       "mondayLunchHours": "11:00–15:30",
       "reservation": "unknown",
       "tip": "小川町すぐの定番インドカレー",
@@ -319,7 +299,6 @@
       "genre": "ベトナム",
       "lat": 35.693081,
       "lng": 139.766922,
-      "walkMins": 2,
       "mondayLunchHours": "11:00–14:30",
       "reservation": "unknown",
       "tip": "南部ベトナム風フーティウ",
@@ -333,7 +312,6 @@
       "genre": "タイ",
       "lat": 35.698673,
       "lng": 139.766403,
-      "walkMins": 6,
       "mondayLunchHours": "11:00–（平日〜23:00）",
       "reservation": "yes",
       "tip": "ソラシティ地下の本格タイ",
@@ -347,7 +325,6 @@
       "genre": "フレンチ",
       "lat": 35.690804,
       "lng": 139.764282,
-      "walkMins": 5,
       "mondayLunchHours": "11:00–15:00（L.O.14:30）",
       "reservation": "yes",
       "tip": "フランス大衆食堂風のビストロ",
@@ -361,7 +338,6 @@
       "genre": "インド",
       "lat": 35.693604,
       "lng": 139.762421,
-      "walkMins": 4,
       "mondayLunchHours": "11:00–15:00",
       "reservation": "yes",
       "tip": "タンドール香るインド料理",
@@ -375,7 +351,6 @@
       "genre": "南インド",
       "lat": 35.691505,
       "lng": 139.769409,
-      "walkMins": 6,
       "mondayLunchHours": "11:00–15:00（L.O.14:30）",
       "reservation": "yes",
       "tip": "南インドのカレーと軽食",
@@ -389,7 +364,6 @@
       "genre": "インド・ネパール",
       "lat": 35.702465,
       "lng": 139.766296,
-      "walkMins": 12,
       "mondayLunchHours": "11:00–15:00（L.O.14:30）",
       "reservation": "unknown",
       "tip": "ナンとカレーの定番セット",
@@ -403,7 +377,6 @@
       "genre": "インド",
       "lat": 35.690811,
       "lng": 139.769913,
-      "walkMins": 7,
       "mondayLunchHours": "11:00–15:00（L.O.14:30・売り切れ次第終了）※不定休・要確認",
       "reservation": "unknown",
       "tip": "ビリヤニ専門・売り切れ注意",
@@ -417,7 +390,6 @@
       "genre": "タイ",
       "lat": 35.693871,
       "lng": 139.770081,
-      "walkMins": 5,
       "mondayLunchHours": "11:15–15:00（L.O.14:45）",
       "reservation": "yes",
       "tip": "ガパオライスが人気",
@@ -431,7 +403,6 @@
       "genre": "インド",
       "lat": 35.696098,
       "lng": 139.761169,
-      "walkMins": 6,
       "mondayLunchHours": "11:00–16:00",
       "reservation": "unknown",
       "tip": "スパイス香るインドカレー",
@@ -445,7 +416,6 @@
       "genre": "フレンチ",
       "lat": 35.695896,
       "lng": 139.763565,
-      "walkMins": 3,
       "mondayLunchHours": "11:30–13:30",
       "reservation": "yes",
       "tip": "隠れ家フレンチ（ランチ短時間）",
@@ -459,7 +429,6 @@
       "genre": "インド",
       "lat": 35.69062,
       "lng": 139.766251,
-      "walkMins": 5,
       "mondayLunchHours": "11:00–15:00",
       "reservation": "yes",
       "tip": "タンドール焼きのインドカレー",
@@ -473,7 +442,6 @@
       "genre": "タイ",
       "lat": 35.691566,
       "lng": 139.769608,
-      "walkMins": 6,
       "mondayLunchHours": "11:00–22:00（通し営業・L.O.21:30）",
       "reservation": "yes",
       "tip": "上野発の本格タイ・神田駅西口すぐ",
@@ -487,7 +455,6 @@
       "genre": "ハワイ",
       "lat": 35.694008,
       "lng": 139.762451,
-      "walkMins": 4,
       "mondayLunchHours": "11:30–15:00（L.O.14:30）",
       "reservation": "unknown",
       "tip": "平日限定ロコモコ＆ポキ丼",
@@ -501,7 +468,6 @@
       "genre": "インド",
       "lat": 35.695889,
       "lng": 139.763885,
-      "walkMins": 3,
       "mondayLunchHours": "11:30–15:00（L.O.14:30）",
       "reservation": "no",
       "tip": "ダバインディア系のストリートインド",
@@ -515,7 +481,6 @@
       "genre": "メキシコ",
       "lat": 35.692902,
       "lng": 139.771713,
-      "walkMins": 7,
       "mondayLunchHours": "11:00–15:00（L.O.15:00）※金曜ランチなし",
       "reservation": "yes",
       "tip": "神田駅高架下のメキシカン定番",
@@ -529,7 +494,6 @@
       "genre": "スリランカ",
       "lat": 35.696552,
       "lng": 139.755508,
-      "walkMins": 12,
       "mondayLunchHours": "11:30–15:30※不定休・要確認",
       "reservation": "no",
       "tip": "ランプライスが名物のスリランカ",
@@ -543,7 +507,6 @@
       "genre": "インド・タイ",
       "lat": 35.693806,
       "lng": 139.764252,
-      "walkMins": 2,
       "mondayLunchHours": "11:00–15:00",
       "reservation": "yes",
       "tip": "小川町すぐのインド＆タイ",
@@ -557,7 +520,6 @@
       "genre": "ベトナム",
       "lat": 35.695263,
       "lng": 139.760468,
-      "walkMins": 6,
       "mondayLunchHours": "11:00–22:00（通し営業・L.O.21:30）",
       "reservation": "unknown",
       "tip": "神保町のフォー専門店",
@@ -573,7 +535,6 @@
 (function () {
   const DATA = JSON.parse(document.getElementById('data').textContent);
   const restaurants = DATA.restaurants;
-  const origin = DATA.origin;
 
   const genreSet = [...new Set(restaurants.map(r => r.genre))].sort();
   const activeGenres = new Set(genreSet);
@@ -624,7 +585,7 @@
     document.getElementById('sidebar').classList.toggle('collapsed');
   });
 
-  const map = L.map('map', { zoomControl: true }).setView([origin.lat, origin.lng], 15);
+  const map = L.map('map', { zoomControl: true });
   const TILES = JSON.parse(document.getElementById('tiles').textContent);
   L.tileLayer(TILES.urlTemplate, {
     maxZoom: TILES.maxZoom || 19,
@@ -632,12 +593,6 @@
     subdomains: TILES.subdomains || 'abc'
   }).addTo(map);
 
-  const originIcon = L.divIcon({
-    className: '',
-    html: '<div style="width:18px;height:18px;background:#1d4ed8;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.35)"></div>',
-    iconSize: [18, 18],
-    iconAnchor: [9, 9]
-  });
   const pinIcon = L.divIcon({
     className: '',
     html: '<div style="width:16px;height:16px;background:#c45c26;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',
@@ -650,10 +605,6 @@
     iconSize: [20, 20],
     iconAnchor: [10, 10]
   });
-
-  L.marker([origin.lat, origin.lng], { icon: originIcon, zIndexOffset: 1000 })
-    .addTo(map)
-    .bindPopup('<div class="popup-title">起点</div><div class="popup-row">' + origin.address + '</div>');
 
   function resLabel(r) {
     if (r.reservation === 'yes') return '予約可';
@@ -676,7 +627,7 @@
       links += '<a class="popup-link" href="' + r.sourceUrl + '" target="_blank" rel="noopener">情報源</a>';
     }
     return '<div class="popup-title">' + r.name + '</div>' +
-      '<div class="popup-row">' + r.genre + ' ・ 徒歩' + r.walkMins + '分</div>' +
+      '<div class="popup-row">' + r.genre + '</div>' +
       '<div class="popup-row">月曜ランチ ' + r.mondayLunchHours + '</div>' +
       '<div class="popup-row">' + resLabel(r) + '</div>' +
       '<div class="popup-tip">' + r.tip + '</div>' +
@@ -695,7 +646,7 @@
       if (!activeGenres.has(r.genre)) return false;
       if (resOnly && r.reservation !== 'yes') return false;
       return true;
-    }).sort((a, b) => a.walkMins - b.walkMins || a.name.localeCompare(b.name, 'ja'));
+    }).sort((a, b) => a.name.localeCompare(b.name, 'ja'));
   }
 
   function selectRestaurant(id, pan) {
@@ -741,7 +692,6 @@
         '<div class="name">' + r.name + '</div>' +
         '<div class="meta">' +
           '<span class="pill">' + r.genre + '</span>' +
-          '<span class="pill">徒歩' + r.walkMins + '分</span>' +
           '<span class="pill ' + resClass(r) + '">' + resLabel(r) + '</span>' +
         '</div>' +
         '<div class="meta">月曜 ' + r.mondayLunchHours + '</div>' +
@@ -755,6 +705,8 @@
   }
 
   refresh();
+  const bounds = L.latLngBounds(restaurants.map(r => [r.lat, r.lng]));
+  map.fitBounds(bounds, { padding: [40, 40] });
   setTimeout(() => map.invalidateSize(), 100);
 })();
 </script>

@@ -1,0 +1,91 @@
+{
+  "single_tile": [
+    {
+      "name": "baseline-osmfr",
+      "url": "https://a.tile.openstreetmap.fr/osmfr/12/3637/1614.png",
+      "median_ms": 839.8,
+      "min_ms": 792.1,
+      "max_ms": 936.4,
+      "errors": 0,
+      "n": 7,
+      "median_bytes": 49559
+    },
+    {
+      "name": "hot",
+      "url": "https://a.tile.openstreetmap.fr/hot/12/3637/1614.png",
+      "median_ms": 674.4,
+      "min_ms": 663.2,
+      "max_ms": 723.4,
+      "errors": 0,
+      "n": 7,
+      "median_bytes": 33620
+    },
+    {
+      "name": "cyclosm",
+      "url": "https://a.tile-cyclosm.openstreetmap.fr/cyclosm/12/3637/1614.png",
+      "median_ms": 810.4,
+      "min_ms": 757.5,
+      "max_ms": 894.0,
+      "errors": 0,
+      "n": 7,
+      "median_bytes": 54099
+    },
+    {
+      "name": "opentopomap",
+      "url": "https://a.tile.opentopomap.org/12/3637/1614.png",
+      "median_ms": 865.8,
+      "min_ms": 814.2,
+      "max_ms": 1009.6,
+      "errors": 0,
+      "n": 7,
+      "median_bytes": 50308
+    },
+    {
+      "name": "versatiles-osm",
+      "url": "https://tiles.versatiles.org/tiles/osm/12/3637/1614",
+      "median_ms": null,
+      "min_ms": null,
+      "max_ms": null,
+      "errors": 7,
+      "n": 7,
+      "median_bytes": null
+    },
+    {
+      "name": "esri-street",
+      "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/12/1614/3637",
+      "median_ms": 424.7,
+      "min_ms": 421.4,
+      "max_ms": 541.1,
+      "errors": 0,
+      "n": 7,
+      "median_bytes": 45055
+    }
+  ],
+  "burst9": {
+    "esri-street": {
+      "sum_ms": 3844.2,
+      "median_ms": 416.8,
+      "errors": 0,
+      "tiles": 9
+    },
+    "hot": {
+      "sum_ms": 5480.1,
+      "median_ms": 648.6,
+      "errors": 0,
+      "tiles": 9
+    },
+    "cyclosm": {
+      "sum_ms": 7800.0,
+      "median_ms": 673.6,
+      "errors": 0,
+      "tiles": 9
+    }
+  },
+  "rank": [
+    "esri-street",
+    "hot",
+    "cyclosm",
+    "baseline-osmfr",
+    "opentopomap"
+  ]
+}

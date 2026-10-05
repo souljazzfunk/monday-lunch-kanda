@@ -1,0 +1,9 @@
+.netlify/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+**/credentials*
+**/token*

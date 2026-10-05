@@ -1,0 +1,15 @@
+{
+  "provider": "openstreetmap-fr-hot",
+  "urlTemplate": "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+  "subdomains": [
+    "a",
+    "b",
+    "c"
+  ],
+  "attribution": "&copy; OpenStreetMap contributors, Tiles courtesy of HOT",
+  "maxZoom": 20,
+  "bannedHostSubstrings": [
+    "tile.openstreetmap.org",
+    "basemaps.cartocdn.com"
+  ]
+}

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>月曜ランチ難民マップ｜神田小川町</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --panel: #ffffff;
+    --ink: #1c1a17;
+    --muted: #6b6560;
+    --accent: #c45c26;
+    --accent2: #2c6e49;
+    --origin: #1d4ed8;
+    --chip: #efeae3;
+    --border: #e4ddd3;
+    --shadow: 0 8px 24px rgba(28,26,23,.08);
+    --radius: 14px;
+    --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font-family: var(--font); color: var(--ink); background: var(--bg); }
+  body { display: flex; flex-direction: column; }
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow); z-index: 1000; flex-wrap: wrap;
+  }
+  header h1 { margin: 0; font-size: 1.05rem; letter-spacing: .02em; }
+  header p { margin: 2px 0 0; font-size: .78rem; color: var(--muted); }
+  .badge {
+    background: var(--accent); color: #fff; font-size: .72rem; font-weight: 700;
+    padding: 6px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  .layout { flex: 1; display: grid; grid-template-columns: minmax(280px, 360px) 1fr; min-height: 0; }
+  aside {
+    background: var(--panel); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; min-height: 0; z-index: 500;
+  }
+  .filters { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .filters h2 { margin: 0 0 8px; font-size: .8rem; color: var(--muted); font-weight: 600; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .chip {
+    border: 1px solid var(--border); background: var(--chip); color: var(--ink);
+    border-radius: 999px; padding: 5px 10px; font-size: .75rem; cursor: pointer;
+    transition: .15s ease;
+  }
+  .chip.active { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+  .toggle-row { display: flex; align-items: center; gap: 8px; font-size: .8rem; }
+  .toggle-row input { accent-color: var(--accent2); width: 16px; height: 16px; }
+  .list { overflow: auto; flex: 1; padding: 8px; }
+  .card {
+    border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+    margin-bottom: 8px; cursor: pointer; background: #fff; transition: .15s ease;
+  }
+  .card:hover, .card.active { border-color: var(--accent); box-shadow: var(--shadow); }
+  .card .name { font-weight: 700; font-size: .92rem; margin: 0 0 4px; }
+  .card .meta { font-size: .75rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill {
+    display: inline-block; background: #f0ebe4; border-radius: 6px; padding: 1px 6px;
+    font-size: .7rem; color: #4a453f;
+  }
+  .pill.res-yes { background: #e4f2ea; color: #1f6b40; }
+  .pill.res-no { background: #f6e8e4; color: #8a3a22; }
+  .card .tip { margin: 6px 0 0; font-size: .78rem; color: var(--ink); }
+  #map { width: 100%; height: 100%; min-height: 320px; }
+  .leaflet-popup-content { margin: 10px 12px; font-family: var(--font); min-width: 180px; }
+  .popup-title { font-weight: 700; font-size: .95rem; margin: 0 0 4px; }
+  .popup-row { font-size: .78rem; color: var(--muted); margin: 2px 0; }
+  .popup-tip { font-size: .8rem; margin-top: 6px; }
+  .popup-link { font-size: .75rem; color: var(--accent); }
+  .legend {
+    position: absolute; right: 12px; bottom: 24px; z-index: 800;
+    background: rgba(255,255,255,.95); border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 10px; font-size: .72rem; box-shadow: var(--shadow);
+  }
+  .legend span { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+  .empty { padding: 24px; text-align: center; color: var(--muted); font-size: .85rem; }
+  .menu-btn {
+    display: none; border: 1px solid var(--border); background: #fff; border-radius: 10px;
+    padding: 8px 12px; font-size: .8rem; cursor: pointer;
+  }
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; grid-template-rows: 45vh 1fr; }
+    aside { border-right: none; border-top: 1px solid var(--border); order: 2; }
+    #map-wrap { order: 1; position: relative; }
+    .menu-btn { display: inline-block; }
+    aside.collapsed .list { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>月曜ランチ難民マップ｜神田小川町</h1>
+    <p>起点：神田小川町1-7　徒歩圏・月曜ランチ営業・異国料理寄り</p>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="menu-btn" id="toggleList" type="button">一覧</button>
+    <span class="badge" id="countBadge">0件</span>
+  </div>
+</header>
+<div class="layout">
+  <aside id="sidebar">
+    <div class="filters">
+      <h2>ジャンル</h2>
+      <div class="chips" id="genreChips"></div>
+      <label class="toggle-row">
+        <input type="checkbox" id="resOnly" />
+        予約可のみ
+      </label>
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
+  <div id="map-wrap" style="position:relative;min-height:0;">
+    <div id="map"></div>
+    <div class="legend">
+      <div><span style="background:#1d4ed8"></span>起点</div>
+      <div><span style="background:#c45c26"></span>ランチ候補</div>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="tiles">
+{
+  "provider": "openstreetmap-fr-hot",
+  "urlTemplate": "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+  "subdomains": [
+    "a",
+    "b",
+    "c"
+  ],
+  "attribution": "&copy; OpenStreetMap contributors, Tiles courtesy of HOT",
+  "maxZoom": 20
+}
+</script>
+<script type="application/json" id="data">
+{
+  "origin": {
+    "name": "起点（神田小川町1-7）",
+    "lat": 35.694077,
+    "lng": 139.765594,
+    "address": "東京都千代田区神田小川町1-7"
+  },
+  "restaurants": [
+    {
+      "id": 1,
+      "name": "アロマズ オブ インディア",
+      "genre": "北インド",
+      "lat": 35.696842,
+      "lng": 139.769363,
+      "walkMins": 6,
+      "mondayLunchHours": "11:00–15:00（L.O.14:30）",
+      "reservation": "yes",
+      "tip": "百名店クラスの本格北インドカレー",
+      "address": "千代田区神田須田町1-21-4 神田NKビル B1F・1F",
+      "sourceUrl": "https://tabelog.com/tokyo/A1310/A131002/13193476/",
+      "officialUrl": "https://www.instagram.com/_aromasofindia_/"
+    },
+    {
+      "id": 2,
+      "name": "メキシカンダイニング ESO 神田1号店",
+      "genre": "メキシコ",
+      "lat": 35.695595,
+      "lng": 139.769958,
+      "walkMins": 5,
+      "mondayLunchHours": "11:00–15:00（L.O.14:30）",
+      "reservation": "yes",
+      "tip": "自家製タコスとブリトー",
+      "address": "千代田区神田須田町1-14 栄華ビルB1F",
+      "sourceUrl": "https://r.gnavi.co.jp/3asw2xjf0000/",
+      "officialUrl": "https://esodining.foodre.jp/"
+    },
+    {
+      "id": 3,
+      "name": "GARB pintino",
+      "genre": "フレンチ",
+      "lat": 35.693401,
+      "lng": 139.760452,
+      "walkMins": 6,
+      "mondayLunchHours": "11:30–15:00（L.O.14:00）",
+      "reservation": "yes",
+      "tip": "テラススクエアのカジュアルフレンチ",
+      "address": "千代田区神田錦町3-22 テラススクエア2F",
+      "sourceUrl": "https://garb-pintino.com/shopinfo/",
+      "officialUrl": "https://garb-pintino.com/shopinfo/"
+    },
+    {
+      "id": 4,
+      "name": "サバイサバイ タイ屋台 神田店",
+      "genre": "タイ",
+      "lat": 35.69231,
+      "lng": 139.772156,
+      "walkMins": 8,
+      "mondayLunchHours": "11:30–15:00（L.O.14:30）",
+      "reservation": "yes",
+      "tip": "ランチ一律990円の屋台タイ",
+      "address": "千代田区鍛冶町2-8-1 平野ビル1F",
+      "sourceUrl": "https://tabelog.com/tokyo/A1310/A131002/13232619/",
+      "officialUrl": "https://www.sabai-group.com/"
+    },
+    {
+      "id": 5,
+      "name": "HANOI KANDA",
+      "genre": "ベトナム",
+      "lat": 35.69244,
+      "lng": 139.770004,
+      "walkMins": 5,
+      "mondayLunchHours": "11:00–15:00",
+      "reservation": "yes",
+      "tip": "フォーとバインミーが人気",
+      "address": "千代田区内神田3-22-4 花喜久ビル3F",
+      "sourceUrl": "https://hanoi-kanda.com/",
+      "officialUrl": "https://hanoi-kanda.com/"
+    },
+    {
+      "id": 6,
+      "name": "タイ&ベトナム料理 Shapla 神田店",
+      "genre": "タイ・ベトナム",
+      "lat": 35.692856,
+      "lng": 139.77179,
+      "walkMins": 7,
+      "mondayLunchHours": "11:30–15:00",
+      "reservation": "yes",
+      "tip": "神田駅すぐのタイ＆ベトナム定番",
+      "address": "千代田区鍛冶町2-7-6 リッツビル2F",
+      "sourceUrl": "https://shapla.owst.jp/",
+      "officialUrl": "https://shapla.owst.jp/"
+    },
+    {
+      "id": 7,
+      "name": "アーンドラ・ダバ",
+      "genre": "南インド",
+      "lat": 35.690758,
+      "lng": 139.770233,
+      "walkMins": 7,
+      "mondayLunchHours": "11:15–15:00（L.O.14:30）",
+      "reservation": "no",
+      "tip": "ミールスとバターチキンが名物",
+      "address": "千代田区内神田3-7-8 サトウハウスビル2F",
+      "sourceUrl": "https://tabelog.com/tokyo/A1310/A131002/13199412/",
+      "officialUrl": "https://gfwh300.gorp.jp/"
+    },
+    {
+      "id": 8,
+      "name": "レストラン モロッコ",
+      "genre": "モロッコ",
+      "lat": 35.690712,
+      "lng": 139.765991,
+      "walkMins": 5,
+      "mondayLunchHours": "11:30–14:30",
+      "reservation": "yes",
+      "tip": "クスクスとタジンの老舗",
+      "address": "千代田区内神田1-5-9 丸山ビル1F",
+      "sourceUrl": "https://visit-chiyoda.tokyo/app/spot/detail/789",
+      "officialUrl": "https://www.instagram.com/restaurant_morocco/"
+    },
+    {
+      "id": 9,
+      "name": "メナムのほとり 神保町本店",
+      "genre": "タイ",
+      "lat": 35.695614,
+      "lng": 139.757889,
+      "walkMins": 9,
+      "mondayLunchHours": "11:00–15:30（L.O.15:00）",
+      "reservation": "yes",
+      "tip": "神保町の老舗タイレストラン",
+      "address": "千代田区神田神保町2-1 岩波神保町ビル別館1F",
+      "sourceUrl": "https://maenam.westindia-group.com/",
+      "officialUrl": "https://maenam.westindia-group.com/"
+    },
+    {
+      "id": 10,
+      "name": "タイ料理 バーン・ニパー",
+      "genre": "タイ",
+      "lat": 35.695683,
+      "lng": 139.759888,
+      "walkMins": 7,
+      "mondayLunchHours": "11:00–15:00",
+      "reservation": "yes",
+      "tip": "家庭的なタイ定食",
+      "address": "千代田区神田神保町1-3-22",
+      "sourceUrl": "https://tabelog.com/tokyo/A1310/A131003/13293657/",
+      "officialUrl": null
+    },
+    {
+      "id": 11,
+      "name": "ムアンタイ",
+      "genre": "タイ",
+      "lat": 35.694736,
+      "lng": 139.759354,
+      "walkMins": 7,
+      "mondayLunchHours": "11:00–15:00",
+      "reservation": "yes",
+      "tip": "ガパオとグリーンカレー",
+      "address": "千代田区神田神保町1-35-2",
+      "sourceUrl": "https://tabelog.com/tokyo/A1310/A131003/13278576/",
+      "officialUrl": "https://www.instagram.com/muangthai_wg/"
+    },
+    {
+      "id": 12,
+      "name": "インド・アジアン料理 プルナ",
+      "genre": "インド",
+      "lat": 35.694908,
+      "lng": 139.765533,
+      "walkMins": 1,
+      "mondayLunchHours": "11:00–15:30",
+      "reservation": "unknown",
+      "tip": "小川町すぐの定番インドカレー",
+      "address": "千代田区神田小川町1-8-14 神田新宮嶋ビル2F",
+      "sourceUrl": "https://hitosara.com/0031166702/",
+      "officialUrl": null
+    },
+    {
+      "id": 13,
+      "name": "SADEC TOKYO",
+      "genre": "ベトナム",
+      "lat": 35.693081,
+      "lng": 139.766922,
+      "walkMins": 2,
+      "mondayLunchHours": "11:00–14:30",
+      "reservation": "unknown",
+      "tip": "南部ベトナム風フーティウ",
+      "address": "千代田区神田司町2-5-7 カツハタビル",
+      "sourceUrl": "https://tabelog.com/tokyo/A1310/A131002/13275215/",
+      "officialUrl": "https://gj1b200.gorp.jp/"
+    },
+    {
+      "id": 14,
+      "name": "サイアムセラドン 御茶ノ水ソラシティ店",
+      "genre": "タイ",
+      "lat": 35.698673,
+      "lng": 139.766403,
+      "walkMins": 6,
+      "mondayLunchHours": "11:00–（平日〜23:00）",
+      "reservation": "yes",
+      "tip": "ソラシティ地下の本格タイ",
+      "address": "千代田区神田駿河台4-6 御茶ノ水ソラシティB1F",
+      "sourceUrl": "https://siam-celadon-ocyanomizu.owst.jp/",
+      "officialUrl": "https://siam-celadon-ocyanomizu.owst.jp/"
+    },
+    {
+      "id": 15,
+      "name": "ビストロ石川亭 神田錦町店",
+      "genre": "フレンチ",
+      "lat": 35.690804,
+      "lng": 139.764282,
+      "walkMins": 5,
+      "mondayLunchHours": "11:00–15:00（L.O.14:30）",
+      "reservation": "yes",
+      "tip": "フランス大衆食堂風のビストロ",
+      "address": "千代田区神田錦町1-21-1 ヒューリック神田橋ビルB1F",
+      "sourceUrl": "https://ishikawatei.co.jp/shop/shop_kanda_top",
+      "officialUrl": "https://ishikawatei.co.jp/shop/shop_kanda_top"
+    },
+    {
+      "id": 16,
+      "name": "タンドール料理 RB's ひつじや 神田店",
+      "genre": "インド",
+      "lat": 35.693604,
+      "lng": 139.762421,
+      "walkMins": 4,
+      "mondayLunchHours": "11:00–15:00",
+      "reservation": "yes",
+      "tip": "タンドール香るインド料理",
+      "address": "千代田区神田錦町3-6-7 錦町スクエアビル1F",
+      "sourceUrl": "https://hitsujiya-kanda.owst.jp/",
+      "officialUrl": "https://hitsujiya-kanda.owst.jp/"
+    },
+    {
+      "id": 17,
+      "name": "南インド・ビストロ ひつじや JR神田駅店",
+      "genre": "南インド",
+      "lat": 35.691505,
+      "lng": 139.769409,
+      "walkMins": 6,
+      "mondayLunchHours": "11:00–15:00（L.O.14:30）",
+      "reservation": "yes",
+      "tip": "南インドのカレーと軽食",
+      "address": "千代田区内神田3-10-7 斉藤ビル1F",
+      "sourceUrl": "https://hitsujiya-kanda.com/",
+      "officialUrl": "https://hitsujiya-kanda.com/"
+    },
+    {
+      "id": 18,
+      "name": "アイキッチン 御茶ノ水店",
+      "genre": "インド・ネパール",
+      "lat": 35.702465,
+      "lng": 139.766296,
+      "walkMins": 12,
+      "mondayLunchHours": "11:00–15:00（L.O.14:30）",
+      "reservation": "unknown",
+      "tip": "ナンとカレーの定番セット",
+      "address": "文京区湯島1-9-10 湯島ビル1F",
+      "sourceUrl": "https://www.hotpepper.jp/strJ001126146/",
+      "officialUrl": "https://hamoni.jp/shop/ln0RZ2alOUygNE8yFlOA"
+    },
+    {
+      "id": 19,
+      "name": "ジョニーのビリヤニ 神田店",
+      "genre": "インド",
+      "lat": 35.690811,
+      "lng": 139.769913,
+      "walkMins": 7,
+      "mondayLunchHours": "11:00–15:00（L.O.14:30・売り切れ次第終了）※不定休・要確認",
+      "reservation": "unknown",
+      "tip": "ビリヤニ専門・売り切れ注意",
+      "address": "千代田区内神田3-8-1",
+      "sourceUrl": "https://www.j-biryani.com/store.php",
+      "officialUrl": "https://www.j-biryani.com/store.php"
+    },
+    {
+      "id": 20,
+      "name": "タイ料理ジャンピー",
+      "genre": "タイ",
+      "lat": 35.693871,
+      "lng": 139.770081,
+      "walkMins": 5,
+      "mondayLunchHours": "11:15–15:00（L.O.14:45）",
+      "reservation": "yes",
+      "tip": "ガパオライスが人気",
+      "address": "千代田区神田鍛冶町3-5-2 工藤ビル1F",
+      "sourceUrl": "https://jumpee-kanda.com/",
+      "officialUrl": "https://jumpee-kanda.com/"
+    },
+    {
+      "id": 21,
+      "name": "SPICE KITCHEN3",
+      "genre": "インド",
+      "lat": 35.696098,
+      "lng": 139.761169,
+      "walkMins": 6,
+      "mondayLunchHours": "11:00–16:00",
+      "reservation": "unknown",
+      "tip": "スパイス香るインドカレー",
+      "address": "千代田区神田小川町3-10-3 振天堂ビル1F",
+      "sourceUrl": "https://tabelog.com/tokyo/A1310/A131003/13048756/",
+      "officialUrl": null
+    },
+    {
+      "id": 22,
+      "name": "ビストロクルル",
+      "genre": "フレンチ",
+      "lat": 35.695896,
+      "lng": 139.763565,
+      "walkMins": 3,
+      "mondayLunchHours": "11:30–13:30",
+      "reservation": "yes",
+      "tip": "隠れ家フレンチ（ランチ短時間）",
+      "address": "千代田区神田駿河台3-7-3 新興ビル1F",
+      "sourceUrl": "https://queueleuleu.com/access",
+      "officialUrl": "https://queueleuleu.com/"
+    },
+    {
+      "id": 23,
+      "name": "ザ・タンドール 神田店",
+      "genre": "インド",
+      "lat": 35.69062,
+      "lng": 139.766251,
+      "walkMins": 5,
+      "mondayLunchHours": "11:00–15:00",
+      "reservation": "yes",
+      "tip": "タンドール焼きのインドカレー",
+      "address": "千代田区内神田1-5-11 セントラル大手町1F",
+      "sourceUrl": "https://akr7196425876.owst.jp/",
+      "officialUrl": "https://akr7196425876.owst.jp/"
+    },
+    {
+      "id": 24,
+      "name": "イムアロイ 神田店",
+      "genre": "タイ",
+      "lat": 35.691566,
+      "lng": 139.769608,
+      "walkMins": 6,
+      "mondayLunchHours": "11:00–22:00（通し営業・L.O.21:30）",
+      "reservation": "yes",
+      "tip": "上野発の本格タイ・神田駅西口すぐ",
+      "address": "千代田区内神田3-15-1 高安ビル1F",
+      "sourceUrl": "https://imaroikanda.owst.jp/",
+      "officialUrl": null
+    },
+    {
+      "id": 25,
+      "name": "カフェ&ダイニング jimbocho",
+      "genre": "ハワイ",
+      "lat": 35.694008,
+      "lng": 139.762451,
+      "walkMins": 4,
+      "mondayLunchHours": "11:30–15:00（L.O.14:30）",
+      "reservation": "unknown",
+      "tip": "平日限定ロコモコ＆ポキ丼",
+      "address": "千代田区神田小川町3-11-2 インペリアルお茶の水2F",
+      "sourceUrl": "https://jimbocho.jp/",
+      "officialUrl": "https://jimbocho.jp/"
+    },
+    {
+      "id": 26,
+      "name": "Indian Street Food & Bar GOND",
+      "genre": "インド",
+      "lat": 35.695889,
+      "lng": 139.763885,
+      "walkMins": 3,
+      "mondayLunchHours": "11:30–15:00（L.O.14:30）",
+      "reservation": "no",
+      "tip": "ダバインディア系のストリートインド",
+      "address": "千代田区神田駿河台3-5-15 荒井ビル1F",
+      "sourceUrl": "https://www.gondtokyo.com/",
+      "officialUrl": "https://www.gondtokyo.com/"
+    },
+    {
+      "id": 27,
+      "name": "BAN蔵",
+      "genre": "メキシコ",
+      "lat": 35.692902,
+      "lng": 139.771713,
+      "walkMins": 7,
+      "mondayLunchHours": "11:00–15:00（L.O.15:00）※金曜ランチなし",
+      "reservation": "yes",
+      "tip": "神田駅高架下のメキシカン定番",
+      "address": "千代田区鍛冶町2-12-11 2F",
+      "sourceUrl": "https://hitosara.com/0031190124/",
+      "officialUrl": null
+    },
+    {
+      "id": 28,
+      "name": "スパイシービストロ タップロボーン神保町店",
+      "genre": "スリランカ",
+      "lat": 35.696552,
+      "lng": 139.755508,
+      "walkMins": 12,
+      "mondayLunchHours": "11:30–15:30※不定休・要確認",
+      "reservation": "no",
+      "tip": "ランプライスが名物のスリランカ",
+      "address": "千代田区神田神保町2-6-3 早川青砥ビル1F",
+      "sourceUrl": "https://taprobane.info/jinbocho",
+      "officialUrl": "https://taprobane.info/jinbocho"
+    },
+    {
+      "id": 29,
+      "name": "ASIAN DINING KOHINOOR コヒノール 小川町店",
+      "genre": "インド・タイ",
+      "lat": 35.693806,
+      "lng": 139.764252,
+      "walkMins": 2,
+      "mondayLunchHours": "11:00–15:00",
+      "reservation": "yes",
+      "tip": "小川町すぐのインド＆タイ",
+      "address": "千代田区神田錦町1-14-12 立花日英ビル1F",
+      "sourceUrl": "https://www.hotpepper.jp/strJ001268839/",
+      "officialUrl": null
+    },
+    {
+      "id": 30,
+      "name": "Viet Origin ベト屋 神保町店",
+      "genre": "ベトナム",
+      "lat": 35.695263,
+      "lng": 139.760468,
+      "walkMins": 6,
+      "mondayLunchHours": "11:00–22:00（通し営業・L.O.21:30）",
+      "reservation": "unknown",
+      "tip": "神保町のフォー専門店",
+      "address": "千代田区神田神保町1-19-3 1F",
+      "sourceUrl": "https://betoya.jp/store/jimbocho/",
+      "officialUrl": "https://betoya.jp/store/jimbocho/"
+    }
+  ]
+}
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function () {
+  const DATA = JSON.parse(document.getElementById('data').textContent);
+  const restaurants = DATA.restaurants;
+  const origin = DATA.origin;
+
+  const genreSet = [...new Set(restaurants.map(r => r.genre))].sort();
+  const activeGenres = new Set(genreSet);
+  let resOnly = false;
+  let selectedId = null;
+  const markers = {};
+
+  const chipsEl = document.getElementById('genreChips');
+  genreSet.forEach(g => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip active';
+    b.textContent = g;
+    b.dataset.genre = g;
+    b.addEventListener('click', () => {
+      if (activeGenres.has(g)) {
+        if (activeGenres.size === 1) return;
+        activeGenres.delete(g);
+        b.classList.remove('active');
+      } else {
+        activeGenres.add(g);
+        b.classList.add('active');
+      }
+      refresh();
+    });
+    chipsEl.appendChild(b);
+  });
+
+  // All / clear helpers
+  const allBtn = document.createElement('button');
+  allBtn.type = 'button';
+  allBtn.className = 'chip';
+  allBtn.textContent = 'すべて';
+  allBtn.style.borderStyle = 'dashed';
+  allBtn.addEventListener('click', () => {
+    genreSet.forEach(g => activeGenres.add(g));
+    chipsEl.querySelectorAll('.chip[data-genre]').forEach(c => c.classList.add('active'));
+    refresh();
+  });
+  chipsEl.prepend(allBtn);
+
+  document.getElementById('resOnly').addEventListener('change', (e) => {
+    resOnly = e.target.checked;
+    refresh();
+  });
+
+  document.getElementById('toggleList').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+  });
+
+  const map = L.map('map', { zoomControl: true }).setView([origin.lat, origin.lng], 15);
+  const TILES = JSON.parse(document.getElementById('tiles').textContent);
+  L.tileLayer(TILES.urlTemplate, {
+    maxZoom: TILES.maxZoom || 19,
+    attribution: TILES.attribution,
+    subdomains: TILES.subdomains || 'abc'
+  }).addTo(map);
+
+  const originIcon = L.divIcon({
+    className: '',
+    html: '<div style="width:18px;height:18px;background:#1d4ed8;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.35)"></div>',
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
+  });
+  const pinIcon = L.divIcon({
+    className: '',
+    html: '<div style="width:16px;height:16px;background:#c45c26;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8]
+  });
+  const pinActive = L.divIcon({
+    className: '',
+    html: '<div style="width:20px;height:20px;background:#2c6e49;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.4)"></div>',
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+  });
+
+  L.marker([origin.lat, origin.lng], { icon: originIcon, zIndexOffset: 1000 })
+    .addTo(map)
+    .bindPopup('<div class="popup-title">起点</div><div class="popup-row">' + origin.address + '</div>');
+
+  function resLabel(r) {
+    if (r.reservation === 'yes') return '予約可';
+    if (r.reservation === 'no') return '予約不可';
+    return '予約 要確認';
+  }
+  function resClass(r) {
+    if (r.reservation === 'yes') return 'res-yes';
+    if (r.reservation === 'no') return 'res-no';
+    return '';
+  }
+
+  function popupHtml(r) {
+    var links = '';
+    if (r.officialUrl) {
+      links += '<a class="popup-link" href="' + r.officialUrl + '" target="_blank" rel="noopener">公式サイト</a>';
+    }
+    if (r.sourceUrl) {
+      if (links) links += ' · ';
+      links += '<a class="popup-link" href="' + r.sourceUrl + '" target="_blank" rel="noopener">情報源</a>';
+    }
+    return '<div class="popup-title">' + r.name + '</div>' +
+      '<div class="popup-row">' + r.genre + ' ・ 徒歩' + r.walkMins + '分</div>' +
+      '<div class="popup-row">月曜ランチ ' + r.mondayLunchHours + '</div>' +
+      '<div class="popup-row">' + resLabel(r) + '</div>' +
+      '<div class="popup-tip">' + r.tip + '</div>' +
+      (links ? '<div class="popup-row">' + links + '</div>' : '');
+  }
+
+  restaurants.forEach(r => {
+    const m = L.marker([r.lat, r.lng], { icon: pinIcon });
+    m.bindPopup(popupHtml(r));
+    m.on('click', () => selectRestaurant(r.id, false));
+    markers[r.id] = m;
+  });
+
+  function filtered() {
+    return restaurants.filter(r => {
+      if (!activeGenres.has(r.genre)) return false;
+      if (resOnly && r.reservation !== 'yes') return false;
+      return true;
+    }).sort((a, b) => a.walkMins - b.walkMins || a.name.localeCompare(b.name, 'ja'));
+  }
+
+  function selectRestaurant(id, pan) {
+    selectedId = id;
+    Object.keys(markers).forEach(k => {
+      const mk = markers[k];
+      mk.setIcon(Number(k) === id ? pinActive : pinIcon);
+    });
+    document.querySelectorAll('.card').forEach(c => {
+      c.classList.toggle('active', Number(c.dataset.id) === id);
+    });
+    const r = restaurants.find(x => x.id === id);
+    if (r && markers[id]) {
+      markers[id].openPopup();
+      if (pan) map.setView([r.lat, r.lng], Math.max(map.getZoom(), 16), { animate: true });
+      const el = document.querySelector('.card[data-id="' + id + '"]');
+      if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+
+  function refresh() {
+    const items = filtered();
+    document.getElementById('countBadge').textContent = items.length + '件';
+    const list = document.getElementById('list');
+    list.innerHTML = '';
+    if (!items.length) {
+      list.innerHTML = '<div class="empty">条件に合う店がありません</div>';
+    }
+    const visibleIds = new Set(items.map(r => r.id));
+    restaurants.forEach(r => {
+      const m = markers[r.id];
+      if (visibleIds.has(r.id)) {
+        if (!map.hasLayer(m)) m.addTo(map);
+      } else if (map.hasLayer(m)) {
+        map.removeLayer(m);
+      }
+    });
+    items.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'card' + (selectedId === r.id ? ' active' : '');
+      div.dataset.id = r.id;
+      div.innerHTML =
+        '<div class="name">' + r.name + '</div>' +
+        '<div class="meta">' +
+          '<span class="pill">' + r.genre + '</span>' +
+          '<span class="pill">徒歩' + r.walkMins + '分</span>' +
+          '<span class="pill ' + resClass(r) + '">' + resLabel(r) + '</span>' +
+        '</div>' +
+        '<div class="meta">月曜 ' + r.mondayLunchHours + '</div>' +
+        '<div class="tip">' + r.tip + '</div>' +
+        (r.officialUrl
+          ? '<div class="meta"><a class="popup-link" href="' + r.officialUrl + '" target="_blank" rel="noopener">公式サイト</a></div>'
+          : '');
+      div.addEventListener('click', () => selectRestaurant(r.id, true));
+      list.appendChild(div);
+    });
+  }
+
+  refresh();
+  setTimeout(() => map.invalidateSize(), 100);
+})();
+</script>
+</body>
+</html>
